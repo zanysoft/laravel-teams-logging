@@ -1,11 +1,10 @@
 # Laravel Teams Logging
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/zanysoft/laravel-teams-logging.svg?style=flat-square)](https://packagist.org/packages/zanysoft/laravel-teams-logging)
-[![Total Downloads](https://img.shields.io/packagist/dt/zanysoft/laravel-teams-logging.svg?style=flat-square)](https://packagist.org/packages/zanysoft/laravel-teams-logging)
-[![License](https://img.shields.io/packagist/l/zanysoft/laravel-teams-logging.svg?style=flat-square)](LICENSE.md)
+[![Software License][ico-license]](LICENSE)
+[![Latest Version on Packagist][ico-version]][link-packagist]
+[![Total Downloads][ico-downloads]][link-downloads]
 
 A Laravel logging channel that sends application log messages directly to **Microsoft Teams** using an Incoming Webhook.
-
 
 ## Features
 
@@ -181,3 +180,17 @@ Examples of log messages displayed in Microsoft Teams using the **card** style.
 This package is open-source software licensed under the **MIT License**.
 
 See the [LICENSE](LICENSE.md) file for more information.
+
+
+
+[ico-version]: https://img.shields.io/packagist/v/zanysoft/laravel-teams-logging.svg?style=flat-square
+[ico-license]: https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square
+[ico-scrutinizer]: https://img.shields.io/scrutinizer/coverage/g/zanysoft/MailTracker.svg?style=flat-square
+[ico-code-quality]: https://img.shields.io/scrutinizer/g/zanysoft/MailTracker.svg?style=flat-square
+[ico-downloads]: https://img.shields.io/packagist/dt/zanysoft/laravel-teams-logging.svg?style=flat-square
+
+[link-downloads]: https://packagist.org/packages/zanysoft/laravel-teams-logging
+[link-packagist]: https://packagist.org/packages/zanysoft/laravel-teams-logging
+[link-author]: https://github.com/zanysoft
+[email-me]: mailto:zanysoft.us@gmail.com
+
