@@ -148,6 +148,11 @@ class LoggerHandler extends AbstractProcessingHandler
         return $this->useSimpleStyling($record['level_name'], $record['message']);
     }
 
+    /**
+     * @param $throwable
+     * @param $limit
+     * @return string
+     */
     protected function arrayTraceToString($throwable, $limit = 10)
     {
         $lines = [];
@@ -201,6 +206,10 @@ class LoggerHandler extends AbstractProcessingHandler
         return implode('<br />', $lines); // PHP_EOL
     }
 
+    /**
+     * @param  LogRecord  $record
+     * @return void
+     */
     protected function write(LogRecord $record): void
     {
         $level = mb_strtolower($record['level_name'] ?? '');
