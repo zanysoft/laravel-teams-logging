@@ -6,6 +6,7 @@ use Exception;
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\LogRecord;
 use Throwable;
+use ZanySoft\LaravelTeamsLogging\Exception\FlattenException;
 
 class LoggerHandler extends AbstractProcessingHandler
 {
@@ -30,6 +31,10 @@ class LoggerHandler extends AbstractProcessingHandler
         $this->url = $url;
         $this->style = config('teams-logging.message_style') ?: 'simple';
         $this->name = config('teams-logging.message_title') ?: config('app.name');
+
+        if (! in_array($this->style, ['card', 'simple'])) {
+            $this->style = 'simple';
+        }
     }
 
     /**
@@ -136,7 +141,9 @@ class LoggerHandler extends AbstractProcessingHandler
                 if ($name == 'exception' && config('teams-logging.show_exception', false)) {
                     $name = ucfirst($name);
                     if ($value instanceof Exception || $value instanceof Throwable) {
-                        $value = $this->arrayTraceToString($value, config('teams-logging.exception_limit', 10));
+                        $exception = FlattenException::create($value);
+
+                        $value = $this->arrayTraceToString($exception, config('teams-logging.exception_limit', 10));
                     }
                 }
                 $facts[] = ['name' => $name, 'value' => $value];
@@ -148,70 +155,62 @@ class LoggerHandler extends AbstractProcessingHandler
         return $this->useSimpleStyling($record['level_name'], $record['message']);
     }
 
-    /**
-     * @param $throwable
-     * @param $limit
-     * @return string
-     */
-    protected function arrayTraceToString($throwable, $limit = 10)
+    protected function arrayTraceToString(FlattenException $exception, $limit = 10)
     {
         $lines = [];
-        $trace = $throwable->getTrace();
+        $traces = $exception->getTrace();
 
-        foreach ($trace as $index => $frame) {
+        foreach ($traces as $index => $trace) {
             if ($limit > 0 && count($lines) >= $limit) {
                 break;
             }
-            $file = $frame['file'] ?? '[internal function]';
-            $line = $frame['line'] ?? '?';
 
-            $call = '';
+            $function = $trace['function'] ?? '';
+            $class = $trace['class'] ?? '';
+            $type = $trace['type'] ?? '';
+            $args = $trace['args'] ?? '';
+            $file = $trace['file'] ?? '[internal function]';
+            $line = $trace['line'] ?? '';
 
-            if (isset($frame['class'])) {
-                $call .= $frame['class'];
+            $args = $exception->formatArgs($args);
+
+            $html = "<div><strong style='padding-right: 3px;'>{$index}#</strong>";
+            if ($function) {
+                if ($class) {
+                    $html .= $class;
+                    if ($type) {
+                        $html .= "<strong>{$type}</strong>";
+                    }
             }
-
-            if (isset($frame['type'])) {
-                $call .= $frame['type'];
+                $html .= $function."(<span style='color: #777'>{$args}</span>)";
             }
+            if ($file) {
+                $file = ltrim(str_replace(
+                    str_replace('/', '\\', base_path('')),
+                    '',
+                    str_replace('/', '\\', $file)
+                ), '\\');
 
-            if (isset($frame['function'])) {
-                $call .= $frame['function'];
+                $html .= ($function ? ' in' : 'In')." {$file} (line: {$line})";
             }
+            $html .= '</div>';
 
-            $args = $this->formatArgument($frame['args'] ?? []);
-
-            $lines[] = sprintf(
-                '#%d %s(%s): %s(%s) ',
-                $index,
-                $file,
-                $line,
-                $call,
-                $args
-            );
+            $lines[] = $html;
         }
 
         if (count($trace) > count($lines)) {
-            $moreDetails = ' ...';
-            if (config('log-viewer.route_path') && config('log-viewer.enabled')) {
-                $url = url(config('log-viewer.route_path'));
-
-                $moreDetails = " <a href='{$url}' target='_blank'>Show more detail</a>";
-            }
-            $lines[] = '#'.count($lines).$moreDetails;
+            $lines[] = '#'.count($lines).' ...';
         } else {
-            $lines[] = '#'.count($trace).' {main} ';
+            $lines[] = '#'.count($trace);
         }
 
-        return implode('<br />', $lines); // PHP_EOL
+        return implode('', $lines); // PHP_EOL
     }
 
-    /**
-     * @param  LogRecord  $record
-     * @return void
-     */
     protected function write(LogRecord $record): void
     {
+        try {
+
         $level = mb_strtolower($record['level_name'] ?? '');
         $allow = config("teams-logging.messages.{$level}", false);
 
@@ -239,23 +238,7 @@ class LoggerHandler extends AbstractProcessingHandler
 
             curl_exec($ch);
         }
-    }
-
-    private function formatArgument(array $args): string
-    {
-        $args = array_map(function ($arg) {
-            return match (true) {
-                is_object($arg) => 'Object('.$arg::class.')',
-                is_array($arg) => 'Array',
-                is_string($arg) => "'".$arg."'",
-                is_int($arg), is_float($arg) => (string) $arg,
-                is_bool($arg) => $arg ? 'true' : 'false',
-                is_null($arg) => 'NULL',
-                is_resource($arg) => 'Resource id #'.get_resource_id($arg),
-                default => gettype($arg),
-            };
-        }, $args);
-
-        return implode(', ', $args);
+        } catch (Throwable $e) {
+        }
     }
 }

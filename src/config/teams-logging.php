@@ -9,7 +9,7 @@ return [
     | Set message title. Default is app.name if set null
     |
     */
-    'message_title' => env('TEAMS_MESSAGE_TITLE', env('app_name')),
+    'message_title' => env('TEAMS_MESSAGE_TITLE', env('APP_NAME')),
 
     /*
     |--------------------------------------------------------------------------
@@ -29,7 +29,7 @@ return [
     | Set message style. Available style: simple, card (default: simple)
     |
     */
-    'message_style' => env('TEAMS_MESSAGE_STYLE', env('app_name')),
+    'message_style' => env('TEAMS_MESSAGE_STYLE', 'simple'),
 
     /*
     |--------------------------------------------------------------------------
