@@ -1,6 +1,16 @@
 {
 	"name": "zanysoft/laravel-teams-logging",
 	"description": "Laravel handler to sending messages to Microsoft Teams using the Incoming Webhook connector",
+    "keywords": [
+      "Laravel",
+      "Laravel Logging",
+      "Exception Monitor",
+      "Teams",
+      "Microsoft",
+      "Microsoft Teams",
+      "Logging",
+      "zanysoft"
+    ],
 	"license": "MIT",
 	"authors": [
 		{
